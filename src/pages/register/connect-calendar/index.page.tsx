@@ -3,7 +3,6 @@ import { signIn, useSession } from 'next-auth/react'
 import { ArrowRight, Check } from 'phosphor-react'
 import { Container, Header } from '../styles'
 import { AuthError, ConnectBox, ConnectItem } from './style'
-import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 
 export default function ConnectCalendar() {
@@ -17,6 +16,10 @@ export default function ConnectCalendar() {
 
   async function handleConnectCalendar() {
     await signIn('google')
+  }
+
+  async function handleNavigateToNextStep() {
+    await router.push('/register/time-intervals')
   }
 
   return (
@@ -34,30 +37,35 @@ export default function ConnectCalendar() {
       <ConnectBox>
         <ConnectItem>
           <Text>Google Calendar</Text>
-          {isSignedIn ? 
-          <Button size={"sm"} disabled>
-            Conectado
-            <Check />
-          </Button> 
-          :
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleConnectCalendar}
-          >
-            Conectar
-            <ArrowRight />
-          </Button>
-          }
+          {isSignedIn ? (
+            <Button size={'sm'} disabled>
+              Conectado
+              <Check />
+            </Button>
+          ) : (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleConnectCalendar}
+            >
+              Conectar
+              <ArrowRight />
+            </Button>
+          )}
         </ConnectItem>
 
         {hasAuthError && (
-          <AuthError size={"sm"}>
-            Falha ao se conectar ao Google, verifique se você habilitou as permissões de acesso ao Google Calendar.
+          <AuthError size={'sm'}>
+            Falha ao se conectar ao Google, verifique se você habilitou as
+            permissões de acesso ao Google Calendar.
           </AuthError>
         )}
 
-        <Button type="submit" disabled={!isSignedIn}>
+        <Button
+          onClick={handleNavigateToNextStep}
+          type="submit"
+          disabled={!isSignedIn}
+        >
           Próximo passo
           <ArrowRight />
         </Button>

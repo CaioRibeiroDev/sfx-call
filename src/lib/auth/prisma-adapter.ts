@@ -1,28 +1,31 @@
 import { Adapter } from 'next-auth/adapters'
 import { prisma } from '../prisma'
-import { NextApiRequest, NextApiResponse } from 'next'
+import { NextApiRequest, NextApiResponse, NextPageContext } from 'next'
 import { parseCookies, destroyCookie } from 'nookies'
 
-export function PrismaAdapter(req: NextApiRequest, res: NextApiResponse): Adapter {
+export function PrismaAdapter(
+  req: NextApiRequest | NextPageContext['req'],
+  res: NextApiResponse | NextPageContext['res'],
+): Adapter {
   return {
     async createUser(user) {
-      const { '@sfxcall:userId': userIdOnCookies } = parseCookies({req})
-    
-      if(!userIdOnCookies) throw new Error('User ID not found on cookies.')
+      const { '@sfxcall:userId': userIdOnCookies } = parseCookies({ req })
+
+      if (!userIdOnCookies) throw new Error('User ID not found on cookies.')
 
       const prismaUser = await prisma.user.update({
         where: {
-          id: userIdOnCookies
+          id: userIdOnCookies,
         },
         data: {
           name: user.name,
           email: user.email,
-          avatar_url: user.avatar_url
-        }
+          avatar_url: user.avatar_url,
+        },
       })
 
       destroyCookie({ res }, '@sfxcall:userId', {
-        path: '/'
+        path: '/',
       })
 
       return {
@@ -42,7 +45,7 @@ export function PrismaAdapter(req: NextApiRequest, res: NextApiResponse): Adapte
         },
       })
 
-      if(!user) return null
+      if (!user) return null
 
       return {
         id: user.id,
@@ -60,7 +63,7 @@ export function PrismaAdapter(req: NextApiRequest, res: NextApiResponse): Adapte
         },
       })
 
-      if(!user) return null
+      if (!user) return null
 
       return {
         id: user.id,
@@ -84,7 +87,7 @@ export function PrismaAdapter(req: NextApiRequest, res: NextApiResponse): Adapte
         },
       })
 
-      if(!account) return null
+      if (!account) return null
 
       const { user } = account
 
@@ -164,7 +167,7 @@ export function PrismaAdapter(req: NextApiRequest, res: NextApiResponse): Adapte
         },
       })
 
-      if(!prismaSession) return null
+      if (!prismaSession) return null
 
       const { user, ...session } = prismaSession
 
@@ -206,9 +209,9 @@ export function PrismaAdapter(req: NextApiRequest, res: NextApiResponse): Adapte
     async deleteSession(sessionToken) {
       await prisma.session.delete({
         where: {
-          session_token: sessionToken
-        }
+          session_token: sessionToken,
+        },
       })
-    }
+    },
   }
 }
